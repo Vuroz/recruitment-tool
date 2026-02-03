@@ -1,8 +1,9 @@
 import { PrismaAdapter } from "@auth/prisma-adapter";
 import { type DefaultSession, type NextAuthConfig } from "next-auth";
-import DiscordProvider from "next-auth/providers/discord";
+import CredentialsProvider from "next-auth/providers/credentials";
 
 import { db } from "@/server/db";
+import { verifyUserPassword, findUserByUsername } from "@/server/logic/authService";
 
 /**
  * Module augmentation for `next-auth` types. Allows us to add custom properties to the `session`
@@ -14,15 +15,15 @@ declare module "next-auth" {
   interface Session extends DefaultSession {
     user: {
       id: string;
+      username?: string;
       // ...other properties
       // role: UserRole;
     } & DefaultSession["user"];
   }
 
-  // interface User {
-  //   // ...other properties
-  //   // role: UserRole;
-  // }
+  interface User {
+    username?: string;
+  }
 }
 
 /**
@@ -31,8 +32,53 @@ declare module "next-auth" {
  * @see https://next-auth.js.org/configuration/options
  */
 export const authConfig = {
+  session: { strategy: "jwt" },
   providers: [
-    DiscordProvider,
+    CredentialsProvider({
+      name: "Credentials",
+      credentials: {
+        username: { label: "Username", type: "text" },
+        password: { label: "Password", type: "password" },
+      },
+      authorize: async (credentials) => {
+        const username = credentials?.username;
+        const password = credentials?.password;
+
+        if (typeof username !== "string" || typeof password !== "string") {
+          console.error("Missing credentials");
+          return null;
+        }
+
+        const user = await findUserByUsername(db, username);
+        // const user = await db.user.findUnique({
+        //   where: { username: credentials.username },
+        // });
+
+        if (!user) {
+          console.error("No user for", username);
+          return null;
+        }
+
+        if (!user.password) {
+          console.error("User has no password");
+          return null;
+        }
+
+        const passwordValid = await verifyUserPassword(password, user.password);
+
+        if (!passwordValid) {
+          console.error("Bad password");
+          return null;
+        }
+
+        return {
+          id: user.id,
+          name: user.name ?? undefined,
+          email: user.email ?? undefined,
+          username: user.username ?? undefined,
+        };
+      },
+    }),
     /**
      * ...add more providers here.
      *
@@ -45,12 +91,19 @@ export const authConfig = {
   ],
   adapter: PrismaAdapter(db),
   callbacks: {
-    session: ({ session, user }) => ({
-      ...session,
-      user: {
-        ...session.user,
-        id: user.id,
-      },
-    }),
+    async jwt({ token, user }) {
+      if (user) {
+        token.id = user.id;
+        token.username = user.username;
+      }
+      return token;
+    },
+    async session({ session, token }) {
+      if (session.user && token) {
+        session.user.id = token.id as string;
+        session.user.username = token.username as string | undefined;
+      }
+      return session;
+    },
   },
 } satisfies NextAuthConfig;
