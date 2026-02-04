@@ -50,9 +50,6 @@ export const authConfig = {
         }
 
         const user = await findUserByUsername(db, username);
-        // const user = await db.user.findUnique({
-        //   where: { username: credentials.username },
-        // });
 
         if (!user) {
           console.error("No user for", username);
