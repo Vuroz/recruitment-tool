@@ -1,35 +1,13 @@
-"use client";
+import { auth } from "@/server/auth";
+import { redirect } from "next/navigation";
+import RegisterClientsidePresenter from "./_components/register-client";
 
-import type { RegistrationValues } from "@/validation/registration";
+export default async function RegisterPresenter() {
+  const session = await auth();
 
-import FormView from "./_components/form"
+  if (session?.user) {
+    redirect("/portal");
+  }
 
-import { api } from "@/trpc/react";
-
-export default function RegisterPresenter() {
-    const createUser = api.registration.register.useMutation({
-        onSuccess: () => {
-            console.log("ya");
-        },
-        onError: (error) => {
-            if (error.data?.zodError) {
-                const validationErrors = error.data.zodError.fieldErrors
-                if (validationErrors) {
-                    const errorMsg = Object.values(validationErrors)[0];
-                    alert(errorMsg);
-                    return;
-                }
-            }
-            alert(error.message || "Internal server error");
-        }
-    })
-
-    function submitRegistrationACB(values: RegistrationValues) {
-        // TODO: send values to registration mutation
-        createUser.mutate(values);
-        console.log(values);
-    }
-    return (
-        <FormView onRegister={submitRegistrationACB}/>
-    )
+  return <RegisterClientsidePresenter />;
 }

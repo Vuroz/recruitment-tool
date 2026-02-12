@@ -1,5 +1,6 @@
 import Link from "next/link";
 import type { Session } from "next-auth";
+import { isApplicant } from "@/server/auth/roles";
 
 type HomeViewProps = {
     session: Session | null
@@ -36,7 +37,7 @@ export default async function HomeView({ session }: HomeViewProps) {
             <div className="flex flex-col items-center gap-2">
               <div className="flex flex-col items-center justify-center gap-4">
                 <p className="text-center text-2xl text-white">
-                  {<span>Logged in as {session.user?.name}</span>}
+                  {<span>Logged in as {isApplicant(session.user?.role) ? "applicant" : "recruiter"} {session.user?.name}</span>}
                 </p>
                 <Link
                   href="/api/auth/signout"

@@ -10,6 +10,13 @@ export const registrationRouter = createTRPCRouter({
     register: publicProcedure
         .input(registrationSchema)
         .mutation(async ({ ctx, input }) => {
+            if (ctx.session) {
+                throw new TRPCError({
+                    code: "FORBIDDEN",
+                    message: "You already have an account"
+                })
+            }
+            
             try {
                 return createUser(ctx.db, input);
             } catch {

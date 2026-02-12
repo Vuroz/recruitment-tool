@@ -1,30 +1,10 @@
 import { PrismaAdapter } from "@auth/prisma-adapter";
-import { type DefaultSession, type NextAuthConfig } from "next-auth";
+import { type NextAuthConfig } from "next-auth";
 import CredentialsProvider from "next-auth/providers/credentials";
 
 import { db } from "@/server/db";
 import { verifyUserPassword, findUserByUsername } from "@/server/logic/authService";
-
-/**
- * Module augmentation for `next-auth` types. Allows us to add custom properties to the `session`
- * object and keep type safety.
- *
- * @see https://next-auth.js.org/getting-started/typescript#module-augmentation
- */
-declare module "next-auth" {
-  interface Session extends DefaultSession {
-    user: {
-      id: string;
-      username?: string;
-      // ...other properties
-      // role: UserRole;
-    } & DefaultSession["user"];
-  }
-
-  interface User {
-    username?: string;
-  }
-}
+import { USER_ROLES, type UserRole } from "@/server/auth/roles";
 
 /**
  * Options for NextAuth.js used to configure adapters, providers, callbacks, etc.
@@ -68,11 +48,18 @@ export const authConfig = {
           return null;
         }
 
+        const roleName = user.role?.name;
+        const role =
+          roleName === USER_ROLES.RECRUITER || roleName === USER_ROLES.APPLICANT
+            ? roleName
+            : undefined;
+
         return {
           id: user.id,
           name: user.name ?? undefined,
           email: user.email ?? undefined,
           username: user.username ?? undefined,
+          role: role,
         };
       },
     }),
@@ -92,6 +79,7 @@ export const authConfig = {
       if (user) {
         token.id = user.id;
         token.username = user.username;
+        token.role = user.role;
       }
       return token;
     },
@@ -99,6 +87,7 @@ export const authConfig = {
       if (session.user && token) {
         session.user.id = token.id as string;
         session.user.username = token.username as string | undefined;
+        session.user.role = token.role as UserRole | undefined;
       }
       return session;
     },
