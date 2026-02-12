@@ -1,22 +1,28 @@
 import { type PrismaClient } from "../../../generated/prisma";
 
+import {
+    registrationSchema,
+    type RegistrationValues,
+} from "@/validation/registration";
+
 export const createUser = (
     db: PrismaClient,
-    fname: string,
-    lname: string,
-    email: string,
-    pnr: string,
-    username: string,
-    password: string,
+    values: RegistrationValues
 ) => {
+    const validationResult = registrationSchema.safeParse(values);
+    if (!validationResult.success) {
+        throw new Error("Internal server error");
+    }
+    const validatedValues = validationResult.data;
+    
     return db.user.create({
         data: {
-            name: fname,
-            surname: lname,
-            email: email,
-            pnr: pnr,
-            username: username,
-            password: password,
+            name: validatedValues.fname,
+            surname: validatedValues.lname,
+            email: validatedValues.email,
+            pnr: validatedValues.pnr,
+            username: validatedValues.username,
+            password: validatedValues.password,
             role_id: 2,
         }
     })

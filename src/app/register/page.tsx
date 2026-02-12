@@ -17,8 +17,10 @@ export default function RegisterPresenter() {
                 if (validationErrors) {
                     const errorMsg = Object.values(validationErrors)[0];
                     alert(errorMsg);
+                    return;
                 }
             }
+            alert(error.message || "Internal server error");
         }
     })
 
