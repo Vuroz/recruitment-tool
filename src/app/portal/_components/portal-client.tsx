@@ -19,12 +19,12 @@ export default function PortalClientsidePresenter({ session, applicant, applicat
     function onSignOutACB() {
         signOut();
     }
-    
+
     return (<>
-        <HeaderView applicant={applicant} onSignOut={onSignOutACB}/>
+        <HeaderView applicant={applicant} onSignOut={onSignOutACB} />
         {applicant ?
-            <MainViewApplicant applications={applications}/> :
-            <MainViewRecruiter />
+            <MainViewApplicant applications={applications} /> :
+            <MainViewRecruiter applications={applications} />
         }
     </>);
 }

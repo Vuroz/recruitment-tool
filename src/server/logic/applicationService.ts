@@ -13,3 +13,12 @@ export const getUserApplications = (db: PrismaClient, username: string) => {
         }
     });
 }
+
+export const getAllApplications = (db: PrismaClient) => {
+    return db.competence_profile.findMany({
+        include: {
+            competence: true,
+            user: true
+        }
+    });
+}

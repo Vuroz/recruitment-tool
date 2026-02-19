@@ -14,12 +14,14 @@ export default async function PortalPresenter() {
 
     const applicant = isApplicant(session?.user.role);
 
-    const rawApplications = applicant ? await api.application.userApplications() : null;
-    
+    const rawApplications = applicant
+        ? await api.application.userApplications()
+        : await api.application.allApplications();
+
     const applications = rawApplications?.map(app => ({
         ...app,
         years_of_experience: app.years_of_experience ? Number(app.years_of_experience) : null,
     })) ?? null;
-    
+
     return <PortalClientsidePresenter session={session} applicant={applicant} applications={applications} />;
 }
