@@ -5,7 +5,7 @@ import type { UserApplication } from "@/types/application";
 
 import { signOut } from "next-auth/react";
 
-import HeaderView from "./header";
+import HeaderView from "../../_components/header";
 import MainViewApplicant from "./main-applicant";
 import MainViewRecruiter from "./main-recruiter";
 
