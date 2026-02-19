@@ -7,6 +7,7 @@ type MainViewRecruiterProps = {
     applications: UserApplication[] | null;
 };
 
+/** Represents a single applicant with all their competencies grouped together. */
 type GroupedApplicant = {
     userId: string;
     name: string;
@@ -14,6 +15,10 @@ type GroupedApplicant = {
     skills: { name: string; years: number | null }[];
 };
 
+/**
+ * Groups a flat list of competence profiles by user.
+ * Each user appears once with all their skills collected into an array.
+ */
 function groupByUser(applications: UserApplication[]): GroupedApplicant[] {
     const map = new Map<string, GroupedApplicant>();
 
@@ -36,6 +41,7 @@ function groupByUser(applications: UserApplication[]): GroupedApplicant[] {
     return Array.from(map.values());
 }
 
+/** Recruiter portal view — displays all applicants as individual cards, grouped by user. */
 export default function MainViewRecruiter({ applications }: MainViewRecruiterProps) {
     const grouped = applications ? groupByUser(applications) : [];
 
