@@ -41,7 +41,7 @@ export default function MainViewRecruiter({ applications }: MainViewRecruiterPro
 
     return (
         <main className="flex min-h-screen flex-col items-center justify-center bg-gradient-to-b from-[#026e6e] to-[#152a2b] text-white">
-            <h2 className="text-xl font-semibold mb-6">All Applications</h2>
+            <h2 className="text-xl font-semibold mb-6 mt-20">All Applications</h2>
             {grouped.length > 0 ? (
                 <div className="flex flex-col gap-4 w-full max-w-lg">
                     {grouped.map((applicant) => (
