@@ -41,39 +41,30 @@ export default function MainViewRecruiter({ applications }: MainViewRecruiterPro
 
     return (
         <main className="flex min-h-screen flex-col items-center justify-center bg-gradient-to-b from-[#026e6e] to-[#152a2b] text-white">
-            <div className="flex flex-col items-center bg-white/10 p-6 rounded-xl">
-                <h2 className="text-xl font-semibold mb-4">All Applications</h2>
-                {grouped.length > 0 ? (
-                    <table>
-                        <thead>
-                            <tr>
-                                <th className="pr-4 text-left">Applicant</th>
-                                <th className="text-left">Competencies</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            {grouped.map((applicant) => (
-                                <tr key={applicant.userId} className="align-top">
-                                    <td className="pr-4 py-2 capitalize">
-                                        {applicant.name} {applicant.surname}
-                                    </td>
-                                    <td className="py-2">
-                                        <ul className="list-none space-y-1">
-                                            {applicant.skills.map((skill, i) => (
-                                                <li key={i} className="capitalize">
-                                                    {skill.name} — {String(skill.years)} years
-                                                </li>
-                                            ))}
-                                        </ul>
-                                    </td>
-                                </tr>
-                            ))}
-                        </tbody>
-                    </table>
-                ) : (
-                    <p className="text-white/60">No applications found.</p>
-                )}
-            </div>
+            <h2 className="text-xl font-semibold mb-6">All Applications</h2>
+            {grouped.length > 0 ? (
+                <div className="flex flex-col gap-4 w-full max-w-lg">
+                    {grouped.map((applicant) => (
+                        <div
+                            key={applicant.userId}
+                            className="bg-white/10 p-4 rounded-xl cursor-pointer hover:bg-white/20 transition-colors"
+                        >
+                            <h3 className="font-semibold capitalize mb-2">
+                                {applicant.name} {applicant.surname}
+                            </h3>
+                            <ul className="list-none space-y-1 text-sm text-white/80">
+                                {applicant.skills.map((skill, i) => (
+                                    <li key={i} className="capitalize">
+                                        {skill.name} — {String(skill.years)} years
+                                    </li>
+                                ))}
+                            </ul>
+                        </div>
+                    ))}
+                </div>
+            ) : (
+                <p className="text-white/60">No applications found.</p>
+            )}
         </main>
     );
 }
