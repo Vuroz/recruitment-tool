@@ -7,6 +7,7 @@ export type UserApplication = Omit<
       user: {
         include: {
           applicationStates: true;
+          availability: true;
         }
       };
     };

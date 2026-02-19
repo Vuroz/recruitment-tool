@@ -1,6 +1,7 @@
 "use client";
 
 import type { UserApplication } from "@/types/application";
+import { formatDateISO } from "@/utils/date";
 import {
     createColumnHelper,
     flexRender,
@@ -9,6 +10,7 @@ import {
     type SortingState,
     useReactTable,
 } from "@tanstack/react-table";
+import { useRouter } from "next/navigation";
 import { useMemo, useState } from "react";
 
 type MainViewRecruiterProps = {
@@ -92,6 +94,7 @@ function getStateColor(state: number | null): string {
 
 /** Recruiter portal view — displays all applicants as individual cards, grouped by user. */
 export default function MainViewRecruiter({ applications }: MainViewRecruiterProps) {
+    const router = useRouter();
     const [sorting, setSorting] = useState<SortingState>([]);
     const grouped = useMemo(() => (applications ? groupByUser(applications) : []), [applications]);
     const skillNames = useMemo(
@@ -123,7 +126,7 @@ export default function MainViewRecruiter({ applications }: MainViewRecruiterPro
                 sortDescFirst: true,
                 cell: (info) => {
                     const value = info.getValue();
-                    return value ? new Date(value).toLocaleDateString() : "-";
+                    return formatDateISO(value);
                 },
             }),
             columnHelper.group({
@@ -269,7 +272,12 @@ export default function MainViewRecruiter({ applications }: MainViewRecruiterPro
                                         .join(" ");
 
                                     return (
-                                        <td key={cell.id} className={bodyClassName}>
+                                        <td
+                                            key={cell.id}
+                                            className={bodyClassName}
+                                            onClick={() => router.push(`/application/${row.original.userId}`)}
+                                            style={{ cursor: "pointer" }}
+                                        >
                                             {flexRender(cell.column.columnDef.cell, cell.getContext())}
                                         </td>
                                     );

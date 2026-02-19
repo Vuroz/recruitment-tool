@@ -16,12 +16,55 @@ export const getUserApplications = (db: PrismaClient, username: string) => {
             user: {
                 include: {
                     applicationStates: true,
+                    availability: true,
                 },
             },
         }
     });
 }
 
+export const getApplicationByUserId = (db: PrismaClient, userId: string) => {
+    return db.competence_profile.findMany({
+        where: {
+            user_id: userId
+        },
+        include: {
+            competence: true,
+            user: { 
+                include: {
+                    applicationStates: true,
+                    availability: true,
+                },
+            },
+        }
+    });
+}
+
+export const getApplicationStateByUserId = (db: PrismaClient, userId: string) => {
+    return db.application_state.findFirst({
+        where: {
+            user_id: userId
+        }
+    })
+}
+
+export const updateApplicationState = (db: PrismaClient, userId: string, newState: "unhandled" | "accepted" | "rejected") => {
+    const stateMap: { [key: string]: number } = {
+        "unhandled": 0,
+        "accepted": 1,
+        "rejected": 2
+    };
+    
+    return db.application_state.updateMany({
+        where: {
+            user_id: userId
+        },
+        data: {
+            state_id: stateMap[newState],
+            updated_at: new Date()
+        }
+    });
+}
 /**
  * Fetches all competence profiles across all users.
  * Used by the recruiter portal view to list every applicant's skills.
@@ -32,7 +75,8 @@ export const getAllApplications = (db: PrismaClient) => {
             competence: true,
             user: {
                 include: {
-                    applicationStates: true
+                    applicationStates: true,
+                    availability: true,
                 }
             }
         }
