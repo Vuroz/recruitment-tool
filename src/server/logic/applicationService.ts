@@ -13,7 +13,11 @@ export const getUserApplications = (db: PrismaClient, username: string) => {
         },
         include: {
             competence: true,
-            user: true
+            user: {
+                include: {
+                    applicationStates: true,
+                },
+            },
         }
     });
 }
@@ -26,7 +30,11 @@ export const getAllApplications = (db: PrismaClient) => {
     return db.competence_profile.findMany({
         include: {
             competence: true,
-            user: true
+            user: {
+                include: {
+                    applicationStates: true
+                }
+            }
         }
     });
 }
