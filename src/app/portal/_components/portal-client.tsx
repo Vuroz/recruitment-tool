@@ -15,16 +15,21 @@ type PortalClientsidePresenterProps = {
     applications: UserApplication[] | null;
 };
 
+/**
+ * Client-side presenter that renders the portal layout.
+ * Switches between the applicant and recruiter main views based on the user's role.
+ */
 export default function PortalClientsidePresenter({ session, applicant, applications }: PortalClientsidePresenterProps) {
     function onSignOutACB() {
         signOut();
     }
-    
+
     return (<>
-        <HeaderView applicant={applicant} onSignOut={onSignOutACB}/>
+        <HeaderView applicant={applicant} onSignOut={onSignOutACB} />
+        {/* Render the appropriate main view based on user role */}
         {applicant ?
-            <MainViewApplicant applications={applications}/> :
-            <MainViewRecruiter />
+            <MainViewApplicant applications={applications} /> :
+            <MainViewRecruiter applications={applications} />
         }
     </>);
 }

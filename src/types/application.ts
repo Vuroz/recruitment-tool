@@ -4,7 +4,11 @@ export type UserApplication = Omit<
   Prisma.competence_profileGetPayload<{
     include: {
       competence: true;
-      user: true;
+      user: {
+        include: {
+          applicationStates: true;
+        }
+      };
     };
   }>,
   "years_of_experience"
