@@ -5,6 +5,10 @@ import { Geist } from "next/font/google";
 
 import { TRPCReactProvider } from "@/trpc/react";
 
+/**
+ * Server-side root layout component that wraps all pages in the application.
+ * Provides global context including TRPC React Provider and font configuration.
+ */
 export const metadata: Metadata = {
   title: "Recruitment Tool",
   description: "Recruitment Tool created for the course IV1201",

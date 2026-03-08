@@ -1,3 +1,6 @@
+/**
+ * Defines the possible roles for a user in the system.
+ */
 export const USER_ROLES = {
   RECRUITER: "recruiter",
   APPLICANT: "applicant",
@@ -6,9 +9,9 @@ export const USER_ROLES = {
 export type UserRole = (typeof USER_ROLES)[keyof typeof USER_ROLES];
 
 export const isRecruiter = (role?: UserRole | null) => {
-    return role === USER_ROLES.RECRUITER;
+  return role === USER_ROLES.RECRUITER;
 };
 
 export const isApplicant = (role?: UserRole | null) => {
-    return role === USER_ROLES.APPLICANT;
+  return role === USER_ROLES.APPLICANT;
 };

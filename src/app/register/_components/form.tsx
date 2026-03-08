@@ -8,9 +8,13 @@ type FormViewProps = {
     onRegister: (values: RegistrationValues) => void;
 };
 
+/** Tuple describing a single form field configuration. */
 type FormItem = [type: string, name: keyof RegistrationValues, label: string];
 
+/** Registration form view that collects user input and submits registration data. */
 export default function FormView({ onRegister }: FormViewProps) {
+
+    /** List of form fields to render in the registration form. */
     const formItems: FormItem[] = [
         ["text", "fname", "First Name"],
         ["text", "lname", "Last Name"],
@@ -20,6 +24,7 @@ export default function FormView({ onRegister }: FormViewProps) {
         ["password", "password", "Password"],
     ];
 
+    /** Renders a single input field for the registration form. */
     function renderFormItemCB(item: FormItem) {
         const type = item[0];
         const name = item[1];
@@ -38,6 +43,7 @@ export default function FormView({ onRegister }: FormViewProps) {
         );
     }
 
+    /** Async callback triggered when the registration form is submitted. */
     function onRegisterACB(event: React.SubmitEvent<HTMLFormElement>) {
         event.preventDefault();
 
