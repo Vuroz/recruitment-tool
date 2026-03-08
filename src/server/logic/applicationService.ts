@@ -23,6 +23,7 @@ export const getUserApplications = (db: PrismaClient, username: string) => {
     });
 }
 
+
 export const getApplicationByUserId = (db: PrismaClient, userId: string) => {
     return db.competence_profile.findMany({
         where: {
@@ -30,7 +31,7 @@ export const getApplicationByUserId = (db: PrismaClient, userId: string) => {
         },
         include: {
             competence: true,
-            user: { 
+            user: {
                 include: {
                     applicationStates: true,
                     availability: true,
@@ -40,6 +41,10 @@ export const getApplicationByUserId = (db: PrismaClient, userId: string) => {
     });
 }
 
+/**
+ * Fetches the application state for a specific user.
+ * Used to check for optimistic concurrency control conflicts.
+ */
 export const getApplicationStateByUserId = (db: PrismaClient, userId: string) => {
     return db.application_state.findFirst({
         where: {
@@ -48,13 +53,17 @@ export const getApplicationStateByUserId = (db: PrismaClient, userId: string) =>
     })
 }
 
+/**
+ * Updates the application state for a specific user.
+ * Used by recruiters to change the status of an application.
+ */
 export const updateApplicationState = (db: PrismaClient, userId: string, newState: "unhandled" | "accepted" | "rejected") => {
     const stateMap: { [key: string]: number } = {
         "unhandled": 0,
         "accepted": 1,
         "rejected": 2
     };
-    
+
     return db.application_state.updateMany({
         where: {
             user_id: userId
