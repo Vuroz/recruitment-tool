@@ -12,24 +12,34 @@ import { isApplicant } from "@/server/auth/roles";
  * - Recruiters see all competence profiles across all users.
  */
 export default async function PortalPresenter() {
-    const session = await auth();
+  const session = await auth();
 
-    if (!session?.user) {
-        redirect("/");
-    }
+  if (!session?.user) {
+    redirect("/");
+  }
 
-    const applicant = isApplicant(session?.user.role);
+  const applicant = isApplicant(session?.user.role);
+  
+  const competences = applicant ? await api.competence.getAll() : null;
 
-    // Fetch user-specific applications for applicants, or all applications for recruiters
-    const rawApplications = applicant
-        ? await api.application.userApplications()
-        : await api.application.allApplications();
+  const rawApplications = applicant
+    ? await api.application.userApplications()
+    : await api.application.allApplications();
 
-    // Convert Prisma Decimal to plain number for client-side serialization
-    const applications = rawApplications?.map(app => ({
-        ...app,
-        years_of_experience: app.years_of_experience ? Number(app.years_of_experience) : null,
+  const applications =
+    rawApplications?.map((app) => ({
+      ...app,
+      years_of_experience: app.years_of_experience
+        ? Number(app.years_of_experience)
+        : null,
     })) ?? null;
 
-    return <PortalClientsidePresenter session={session} applicant={applicant} applications={applications} />;
+  return (
+    <PortalClientsidePresenter
+      session={session}
+      applicant={applicant}
+      applications={applications}
+      competences={competences}
+    />
+  );
 }

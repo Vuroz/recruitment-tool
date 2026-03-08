@@ -1,13 +1,22 @@
 import { TRPCError } from "@trpc/server";
-
 import { createTRPCRouter, protectedProcedure } from "@/server/api/trpc";
 
+
+import { applyCompetences } from "@/server/logic/competenceApplicationService";
+import { competenceApplicationSchema, type CompetenceApplicationValues, } from "@/validation/competence";
 import { getUserApplications, getAllApplications, getApplicationByUserId, updateApplicationState, getApplicationStateByUserId } from "@/server/logic/applicationService";
 import { isRecruiter } from "@/server/auth/roles";
 import { applicationStateChangeSchema, userIdSchema } from "@/validation/recruiter";
 
 /** Router for application-related queries (competence profiles). */
 export const applicationRouter = createTRPCRouter({
+    applyCompetences: protectedProcedure
+      .input(competenceApplicationSchema.array())
+      .mutation(async ({ ctx, input }) => {
+        const userId = ctx.session.user.id;
+
+        return applyCompetences(ctx.db, userId, input);
+      }),
     /** Returns competence profiles belonging to the currently logged-in user. */
     userApplications: protectedProcedure
         .query(async ({ ctx }) => {
