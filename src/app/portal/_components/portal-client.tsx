@@ -8,7 +8,7 @@ import { api } from "@/trpc/react";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 
-import HeaderView from "./header";
+import HeaderView from "../../_components/header";
 import MainViewApplicant from "./main-applicant";
 import MainViewRecruiter from "./main-recruiter";
 
@@ -105,7 +105,7 @@ export default function PortalClientsidePresenter({
           onSubmit={handleSubmit}
         />
       ) : (
-        <MainViewRecruiter />
+        <MainViewRecruiter applications={applications} />
       )}
     </>
   );

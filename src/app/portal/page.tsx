@@ -5,6 +5,12 @@ import PortalClientsidePresenter from "./_components/portal-client";
 import { api } from "@/trpc/server";
 import { isApplicant } from "@/server/auth/roles";
 
+/**
+ * Server-side presenter for the portal page.
+ * Determines the user's role and fetches the appropriate application data:
+ * - Applicants see only their own competence profiles.
+ * - Recruiters see all competence profiles across all users.
+ */
 export default async function PortalPresenter() {
   const session = await auth();
 
@@ -13,12 +19,12 @@ export default async function PortalPresenter() {
   }
 
   const applicant = isApplicant(session?.user.role);
-
+  
   const competences = applicant ? await api.competence.getAll() : null;
 
   const rawApplications = applicant
     ? await api.application.userApplications()
-    : null;
+    : await api.application.allApplications();
 
   const applications =
     rawApplications?.map((app) => ({
