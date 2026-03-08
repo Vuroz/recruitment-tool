@@ -64,14 +64,16 @@ export const updateApplicationState = (db: PrismaClient, userId: string, newStat
         "rejected": 2
     };
 
-    return db.application_state.updateMany({
-        where: {
-            user_id: userId
-        },
-        data: {
-            state_id: stateMap[newState],
-            updated_at: new Date()
-        }
+    return db.$transaction(async (prisma) => {
+        await prisma.application_state.updateMany({
+            where: {
+                user_id: userId
+            },
+            data: {
+                state_id: stateMap[newState],
+                updated_at: new Date()
+            }
+        });
     });
 }
 /**

@@ -5,6 +5,14 @@ import {
     type RegistrationValues,
 } from "@/validation/registration";
 
+/**
+ * Creates a new user with an initial application state.
+ * 
+ * @param db - The Prisma database client
+ * @param values - The registration data containing user information
+ * @returns A promise that resolves when the user and application state are created
+ * @throws When user data validation fails
+ */
 export const createUser = (
     db: PrismaClient,
     values: RegistrationValues
@@ -15,15 +23,23 @@ export const createUser = (
     }
     const validatedValues = validationResult.data;
     
-    return db.user.create({
-        data: {
-            name: validatedValues.fname,
-            surname: validatedValues.lname,
-            email: validatedValues.email,
-            pnr: validatedValues.pnr,
-            username: validatedValues.username,
-            password: validatedValues.password,
-            role_id: 2,
-        }
-    })
+    return db.$transaction(async (prisma) => {
+        await prisma.user.create({
+            data: {
+                name: validatedValues.fname,
+                surname: validatedValues.lname,
+                email: validatedValues.email,
+                pnr: validatedValues.pnr,
+                username: validatedValues.username,
+                password: validatedValues.password,
+                role_id: 2,
+                
+                applicationStates: {
+                    create: {
+                        state_id: 0,
+                    }
+                }
+            }
+        });
+    });
 }
