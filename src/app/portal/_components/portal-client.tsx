@@ -9,6 +9,7 @@ import { signOut } from "next-auth/react";
 import { api } from "@/trpc/react";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
+import { isDatabaseUnavailableError } from "@/utils/databaseAvailability";
 
 import HeaderView from "../../_components/header";
 import MainViewApplicant from "./main-applicant";
@@ -49,6 +50,9 @@ export default function PortalClientsidePresenter({
       alert("Competences submitted!");
     },
     onError: (e) => {
+      if (isDatabaseUnavailableError(e)) {
+        return;
+      }
       alert(e.message || "Error submitting competences");
     },
   });
@@ -102,6 +106,9 @@ export default function PortalClientsidePresenter({
       alert("Availability added!");
     },
     onError: (error) => {
+      if (isDatabaseUnavailableError(error)) {
+        return;
+      }
       if (error.data?.zodError) {
         const validationErrors = error.data.zodError.fieldErrors;
         if (validationErrors && Object.keys(validationErrors).length > 0) {

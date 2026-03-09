@@ -13,6 +13,7 @@ import { ZodError } from "zod";
 
 import { auth } from "@/server/auth";
 import { db } from "@/server/db";
+import { isDatabaseUnavailableError } from "@/utils/databaseAvailability";
 
 /**
  * 1. CONTEXT
@@ -101,6 +102,21 @@ const timingMiddleware = t.middleware(async ({ next, path }) => {
   return result;
 });
 
+const databaseAvailabilityMiddleware = t.middleware(async ({ next }) => {
+  try {
+    return await next();
+  } catch (error) {
+    if (isDatabaseUnavailableError(error)) {
+      throw new TRPCError({
+        code: "SERVICE_UNAVAILABLE",
+        message: "Service temporarily unavailable",
+      });
+    }
+
+    throw error;
+  }
+});
+
 /**
  * Public (unauthenticated) procedure
  *
@@ -108,7 +124,9 @@ const timingMiddleware = t.middleware(async ({ next, path }) => {
  * guarantee that a user querying is authorized, but you can still access user session data if they
  * are logged in.
  */
-export const publicProcedure = t.procedure.use(timingMiddleware);
+export const publicProcedure = t.procedure
+  .use(databaseAvailabilityMiddleware)
+  .use(timingMiddleware);
 
 /**
  * Protected (authenticated) procedure
@@ -119,6 +137,7 @@ export const publicProcedure = t.procedure.use(timingMiddleware);
  * @see https://trpc.io/docs/procedures
  */
 export const protectedProcedure = t.procedure
+  .use(databaseAvailabilityMiddleware)
   .use(timingMiddleware)
   .use(({ ctx, next }) => {
     if (!ctx.session?.user) {
