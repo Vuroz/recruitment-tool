@@ -126,7 +126,7 @@ const databaseAvailabilityMiddleware = t.middleware(async ({ next }) => {
  */
 export const publicProcedure = t.procedure
   .use(databaseAvailabilityMiddleware)
-  .use(timingMiddleware);
+  // .use(timingMiddleware);
 
 /**
  * Protected (authenticated) procedure
@@ -138,7 +138,7 @@ export const publicProcedure = t.procedure
  */
 export const protectedProcedure = t.procedure
   .use(databaseAvailabilityMiddleware)
-  .use(timingMiddleware)
+  // .use(timingMiddleware)
   .use(({ ctx, next }) => {
     if (!ctx.session?.user) {
       throw new TRPCError({ code: "UNAUTHORIZED" });
