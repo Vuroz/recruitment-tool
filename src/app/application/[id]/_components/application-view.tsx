@@ -7,11 +7,12 @@ import { formatDateISO } from "@/utils/date";
 
 type ApplicationViewProps = {
     application: UserApplication[] | null;
+    onPushResetLink: () => void;
 };
 
 type ApplicationState = "unhandled" | "accepted" | "rejected";
 
-export default function ApplicationView({ application }: ApplicationViewProps) {
+export default function ApplicationView({ application, onPushResetLink }: ApplicationViewProps) {
     const [currentStatus, setCurrentStatus] = useState<ApplicationState | null>(null);
     const [isUpdating, setIsUpdating] = useState(false);
 
@@ -80,6 +81,12 @@ export default function ApplicationView({ application }: ApplicationViewProps) {
         years: app.years_of_experience ?? 0,
     }));
     const availability = (user as any)?.availability ?? [];
+
+    function pushResetLinkACB(event: React.MouseEvent<HTMLButtonElement>) {
+        event.preventDefault();
+
+        onPushResetLink();
+    }
 
     return (
         <main className="min-h-screen bg-gradient-to-b from-[#026e6e] to-[#152a2b] text-white p-8">
@@ -213,6 +220,16 @@ export default function ApplicationView({ application }: ApplicationViewProps) {
                     ) : (
                         <p className="text-white/60">No availability information provided.</p>
                     )}
+                </div>
+
+                <div className="mt-8 rounded-xl border border-white/20 bg-white/5 p-6">
+                    <h2 className="text-2xl font-semibold mb-6">Username & Password Reset</h2>
+                    <p>This is only here for the purposes of demonstration, and should probably not be handled by a recruiter.</p>
+                    <button
+                        type="button"
+                        className="px-4 py-2 rounded-lg bg-white/20 cursor-pointer hover:bg-white/30"
+                        onClick={pushResetLinkACB}
+                    >Send Reset Link</button>
                 </div>
             </div>
         </main>

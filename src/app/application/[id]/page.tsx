@@ -27,9 +27,6 @@ export default async function ApplicationPresenter({params}: ApplicationPresente
 
     const rawApplication = await api.application.getApplicationByUserId({user_id: id});
 
-    console.log(rawApplication);
-    
-
     const application = rawApplication?.map(app => ({
         ...app,
         years_of_experience: app.years_of_experience ? Number(app.years_of_experience) : null,
