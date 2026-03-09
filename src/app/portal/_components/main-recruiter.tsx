@@ -136,12 +136,12 @@ export default function MainViewRecruiter({ applications }: MainViewRecruiterPro
                     columnHelper.accessor("name", {
                         id: COLUMN_IDS.firstName,
                         header: "First Name",
-                        cell: (info) => info.getValue(),
+                        cell: (info) => String(info.getValue()),
                     }),
                     columnHelper.accessor("surname", {
                         id: COLUMN_IDS.lastName,
                         header: "Last Name",
-                        cell: (info) => info.getValue(),
+                        cell: (info) => String(info.getValue()),
                     }),
                 ],
             }),

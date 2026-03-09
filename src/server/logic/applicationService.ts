@@ -1,4 +1,4 @@
-import { PrismaClient } from "../../../generated/prisma";
+import type { PrismaClient } from "../../../generated/prisma";
 
 /**
  * Fetches all competence profiles for a specific user.
@@ -58,7 +58,7 @@ export const getApplicationStateByUserId = (db: PrismaClient, userId: string) =>
  * Used by recruiters to change the status of an application.
  */
 export const updateApplicationState = (db: PrismaClient, userId: string, newState: "unhandled" | "accepted" | "rejected") => {
-    const stateMap: { [key: string]: number } = {
+    const stateMap: Record<string, number> = {
         "unhandled": 0,
         "accepted": 1,
         "rejected": 2

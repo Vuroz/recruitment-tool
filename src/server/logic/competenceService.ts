@@ -1,4 +1,4 @@
-import { PrismaClient } from "../../../generated/prisma";
+import type { PrismaClient } from "../../../generated/prisma";
 
 export const getAllCompetences = (db: PrismaClient) => {
   return db.competence.findMany({

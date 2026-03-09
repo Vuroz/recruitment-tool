@@ -25,7 +25,7 @@ export const availabilityRouter = createTRPCRouter({
 
         try {
             return addAvailabilityByUserId(ctx.db, userId, input);
-        } catch (error) {
+        } catch {
             throw new TRPCError({ code: "INTERNAL_SERVER_ERROR", message: "Failed to add availability" });
         }
     }),
@@ -40,7 +40,7 @@ export const availabilityRouter = createTRPCRouter({
 
         try {
             return removeAvailabilityById(ctx.db, userId, input);
-        } catch (error) {
+        } catch {
             throw new TRPCError({ code: "INTERNAL_SERVER_ERROR", message: "Failed to remove availability" });
         }
     }),
