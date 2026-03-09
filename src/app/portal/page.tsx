@@ -21,6 +21,7 @@ export default async function PortalPresenter() {
   const applicant = isApplicant(session?.user.role);
   
   const competences = applicant ? await api.competence.getAll() : null;
+  const availabilities = applicant ? await api.availability.getUserAvailability() : null;
 
   const rawApplications = applicant
     ? await api.application.userApplications()
@@ -40,6 +41,7 @@ export default async function PortalPresenter() {
       applicant={applicant}
       applications={applications}
       competences={competences}
+      availabilities={availabilities}
     />
   );
 }
