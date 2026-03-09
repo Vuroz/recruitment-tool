@@ -3,7 +3,7 @@ import { createTRPCRouter, protectedProcedure } from "@/server/api/trpc";
 
 
 import { applyCompetences } from "@/server/logic/competenceApplicationService";
-import { competenceApplicationSchema, type CompetenceApplicationValues, } from "@/validation/competence";
+import { competenceApplicationSchema } from "@/validation/competence";
 import { getUserApplications, getAllApplications, getApplicationByUserId, updateApplicationState, getApplicationStateByUserId } from "@/server/logic/applicationService";
 import { isRecruiter } from "@/server/auth/roles";
 import { applicationStateChangeSchema, userIdSchema } from "@/validation/recruiter";
@@ -54,7 +54,7 @@ export const applicationRouter = createTRPCRouter({
             }
             // Get current application state and return error if updated_at from input differs from the one in the database (optimistic concurrency control)
             const dbApplicationState = await getApplicationStateByUserId(ctx.db, input.user_id);
-            if (dbApplicationState && dbApplicationState.updated_at && dbApplicationState.updated_at.getTime() !== input.update_at?.getTime()) {
+            if (dbApplicationState?.updated_at?.getTime() !== input.update_at?.getTime()) {
                 throw new TRPCError({
                     code: "CONFLICT",
                     message: "Application has been updated since you last fetched it. Please refresh and try again."

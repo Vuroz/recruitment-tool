@@ -36,7 +36,7 @@ type PortalClientsidePresenterProps = {
 };
 
 export default function PortalClientsidePresenter({
-  session,
+  session: _session,
   applicant,
   applications,
   competences,

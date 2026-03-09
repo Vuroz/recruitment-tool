@@ -116,9 +116,11 @@ export default function MainViewApplicant({
     event.preventDefault();
 
     const formData = new FormData(event.currentTarget);
+    const fromDateValue = formData.get("from-date");
+    const toDateValue = formData.get("to-date");
     const values: AvailabilityValues = {
-      from_date: new Date(String(formData.get("from-date") ?? "").trim()),
-      to_date: new Date(String(formData.get("to-date") ?? "").trim()),
+      from_date: new Date((typeof fromDateValue === "string" ? fromDateValue : "").trim()),
+      to_date: new Date((typeof toDateValue === "string" ? toDateValue : "").trim()),
     };
 
     onAddAvailability(values);

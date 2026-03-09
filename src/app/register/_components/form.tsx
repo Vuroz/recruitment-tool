@@ -48,13 +48,19 @@ export default function FormView({ onRegister }: FormViewProps) {
         event.preventDefault();
 
         const formData = new FormData(event.currentTarget);
+        const fnameValue = formData.get("fname");
+        const lnameValue = formData.get("lname");
+        const emailValue = formData.get("email");
+        const pnrValue = formData.get("pnr");
+        const usernameValue = formData.get("username");
+        const passwordValue = formData.get("password");
         const values: RegistrationValues = {
-            fname: String(formData.get("fname") ?? "").trim(),
-            lname: String(formData.get("lname") ?? "").trim(),
-            email: String(formData.get("email") ?? "").trim(),
-            pnr: String(formData.get("pnr") ?? "").trim(),
-            username: String(formData.get("username") ?? "").trim(),
-            password: String(formData.get("password") ?? ""),
+            fname: (typeof fnameValue === "string" ? fnameValue : "").trim(),
+            lname: (typeof lnameValue === "string" ? lnameValue : "").trim(),
+            email: (typeof emailValue === "string" ? emailValue : "").trim(),
+            pnr: (typeof pnrValue === "string" ? pnrValue : "").trim(),
+            username: (typeof usernameValue === "string" ? usernameValue : "").trim(),
+            password: typeof passwordValue === "string" ? passwordValue : "",
         };
 
         onRegister(values);

@@ -7,7 +7,7 @@ import ApplicationClientsidePresenter from "./_components/application-client";
 import { api } from "@/trpc/server";
 
 type ApplicationPresenterProps = {
-    params: { id: string };
+    params: Promise<{ id: string }>;
 };
 
 export default async function ApplicationPresenter({params}: ApplicationPresenterProps) {

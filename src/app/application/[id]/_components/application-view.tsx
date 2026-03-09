@@ -18,17 +18,6 @@ export default function ApplicationView({ application }: ApplicationViewProps) {
     const utils = api.useUtils();
     const updateStatusMutation = api.application.updateUserApplicationState.useMutation();
 
-    if (!application || application.length === 0) {
-        return (
-            <main className="flex min-h-screen flex-col items-center justify-center bg-gradient-to-b from-[#026e6e] to-[#152a2b] text-white">
-                <p className="text-xl text-white/60">No application data found.</p>
-            </main>
-        );
-    }
-
-    const user = application[0]?.user;
-    const applicationState = application[0]?.user?.applicationStates?.[0];
-
     // Convert state_id to string format for dropdown
     const getStateString = (stateId: number | null): ApplicationState => {
         switch (stateId) {
@@ -43,10 +32,21 @@ export default function ApplicationView({ application }: ApplicationViewProps) {
         }
     };
 
+    const user = application?.[0]?.user;
+    const applicationState = application?.[0]?.user?.applicationStates?.[0];
+
     useEffect(() => {
         if (!applicationState) return;
         setCurrentStatus(getStateString(applicationState.state_id));
-    }, [applicationState?.state_id]);
+    }, [applicationState]);
+
+    if (!application || application.length === 0) {
+        return (
+            <main className="flex min-h-screen flex-col items-center justify-center bg-gradient-to-b from-[#026e6e] to-[#152a2b] text-white">
+                <p className="text-xl text-white/60">No application data found.</p>
+            </main>
+        );
+    }
 
     const handleStatusChange = async (newState: ApplicationState) => {
         if (isUpdating || !user?.id) return;
@@ -64,7 +64,7 @@ export default function ApplicationView({ application }: ApplicationViewProps) {
             });
 
             // Refetch the application data
-            await utils.application.getApplicationByUserId.invalidate({ user_id: user.id });
+            void utils.application.getApplicationByUserId.invalidate({ user_id: user.id });
         } catch (error) {
             console.error("Failed to update status:", error);
             setCurrentStatus(previousStatus);
@@ -79,7 +79,7 @@ export default function ApplicationView({ application }: ApplicationViewProps) {
         name: app.competence?.name ?? "Unknown",
         years: app.years_of_experience ?? 0,
     }));
-    const availability = (user as any)?.availability ?? [];
+    const availability = user?.availability ?? [];
 
     return (
         <main className="min-h-screen bg-gradient-to-b from-[#026e6e] to-[#152a2b] text-white p-8">
@@ -187,7 +187,7 @@ export default function ApplicationView({ application }: ApplicationViewProps) {
                     <h2 className="text-2xl font-semibold mb-6">Availability</h2>
                     {availability.length > 0 ? (
                         <div className="space-y-4">
-                            {availability.map((period: any, idx: number) => (
+                            {availability.map((period, idx) => (
                                 <div
                                     key={idx}
                                     className="rounded-lg bg-white/10 p-4 hover:bg-white/15 transition-colors"
@@ -196,14 +196,14 @@ export default function ApplicationView({ application }: ApplicationViewProps) {
                                         <div>
                                             <p className="text-sm text-white/70 mb-1">From</p>
                                             <p className="text-lg font-semibold">
-                                                {formatDateISO(period.from_date ?? null)}
+                                                {formatDateISO(period.from_date)}
                                             </p>
                                         </div>
                                         <div className="hidden md:block text-white/50">→</div>
                                         <div>
                                             <p className="text-sm text-white/70 mb-1">To</p>
                                             <p className="text-lg font-semibold">
-                                                {formatDateISO(period.to_date ?? null)}
+                                                {formatDateISO(period.to_date)}
                                             </p>
                                         </div>
                                     </div>

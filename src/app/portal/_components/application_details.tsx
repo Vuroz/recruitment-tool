@@ -4,10 +4,10 @@ import type React from "react";
 
 type ApplicationDetailsViewProps = {
     application: boolean;
-    user: any;
+    user: unknown;
 };
 
-export default function ApplicationDetailsView({ application }: ApplicationDetailsViewProps) {
+export default function ApplicationDetailsView({ application: _application }: ApplicationDetailsViewProps) {
     return <div>
 
     </div>

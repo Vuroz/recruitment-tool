@@ -14,7 +14,7 @@ type ApplicationClientsidePresenterProps = {
 
 export default function ApplicationClientsidePresenter(props: ApplicationClientsidePresenterProps) {
     function onSignOutACB() {
-        signOut();
+        void signOut();
     }
 
     const applicationQuery = api.application.getApplicationByUserId.useQuery(
