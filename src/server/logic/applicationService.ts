@@ -3,6 +3,10 @@ import type { PrismaClient } from "../../../generated/prisma";
 /**
  * Fetches all competence profiles for a specific user.
  * Used by the applicant portal view to show their own skills and experience.
+ *
+ * @param db Prisma client used for database operations.
+ * @param username Authenticated applicant username.
+ * @returns Competence profiles enriched with related user and availability data.
  */
 export const getUserApplications = (db: PrismaClient, username: string) => {
     return db.competence_profile.findMany({
@@ -44,6 +48,10 @@ export const getApplicationByUserId = (db: PrismaClient, userId: string) => {
 /**
  * Fetches the application state for a specific user.
  * Used to check for optimistic concurrency control conflicts.
+ *
+ * @param db Prisma client used for database operations.
+ * @param userId User id whose current state snapshot should be returned.
+ * @returns The latest application state row, or `null` if no state exists.
  */
 export const getApplicationStateByUserId = (db: PrismaClient, userId: string) => {
     return db.application_state.findFirst({
@@ -56,6 +64,11 @@ export const getApplicationStateByUserId = (db: PrismaClient, userId: string) =>
 /**
  * Updates the application state for a specific user.
  * Used by recruiters to change the status of an application.
+ *
+ * @param db Prisma client used for database operations.
+ * @param userId User id whose state will be updated.
+ * @param newState New recruiter decision state.
+ * @returns Transaction promise that completes after state mutation.
  */
 export const updateApplicationState = (db: PrismaClient, userId: string, newState: "unhandled" | "accepted" | "rejected") => {
     const stateMap: Record<string, number> = {
@@ -79,6 +92,9 @@ export const updateApplicationState = (db: PrismaClient, userId: string, newStat
 /**
  * Fetches all competence profiles across all users.
  * Used by the recruiter portal view to list every applicant's skills.
+ *
+ * @param db Prisma client used for database operations.
+ * @returns Full applicant competence dataset for recruiter overviews.
  */
 export const getAllApplications = (db: PrismaClient) => {
     return db.competence_profile.findMany({

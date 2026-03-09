@@ -6,7 +6,11 @@ import { createTRPCRouter, publicProcedure } from "@/server/api/trpc";
 
 import { createUser } from "@/server/logic/registrationService";
 
+/** Public registration router for new applicant accounts. */
 export const registrationRouter = createTRPCRouter({
+    /**
+     * Registers a new user and initializes their default application state.
+     */
     register: publicProcedure
         .input(registrationSchema)
         .mutation(async ({ ctx, input }) => {

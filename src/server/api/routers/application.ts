@@ -10,6 +10,9 @@ import { applicationStateChangeSchema, userIdSchema } from "@/validation/recruit
 
 /** Router for application-related queries (competence profiles). */
 export const applicationRouter = createTRPCRouter({
+        /**
+         * Stores the current applicant's competence choices as a full batch.
+         */
     applyCompetences: protectedProcedure
       .input(competenceApplicationSchema.array())
       .mutation(async ({ ctx, input }) => {
@@ -43,6 +46,9 @@ export const applicationRouter = createTRPCRouter({
             return getApplicationByUserId(ctx.db, input.user_id);
         }),
 
+    /**
+     * Updates an applicant state with optimistic concurency guard checks.
+     */
     updateUserApplicationState: protectedProcedure
         .input(applicationStateChangeSchema)
         .mutation(async ({ ctx, input }) => {

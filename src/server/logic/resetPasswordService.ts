@@ -6,10 +6,11 @@ import { randomUUID } from "crypto";
 import { resend } from "@/utils/resend";
 
 /**
- * Retrieves user details based on the provided reset token.
- * @param db the prisma client
- * @param input the reset password request values
- * @returns the user details if the token is valid, otherwise null
+ * Resolves a reset token and loads lightweight user details for the reset page.
+ *
+ * @param db Prisma client used for database operations.
+ * @param input Token payload from request validation.
+ * @returns Token record with name/surname, or `null` when token is unknown.
  */
 export const getUserByToken = (db: PrismaClient, input: ResetPasswordRequestValues) => {
   return db.password_reset_token.findUnique({
@@ -27,6 +28,14 @@ export const getUserByToken = (db: PrismaClient, input: ResetPasswordRequestValu
   });
 };
 
+/**
+ * Sends a password reset email containing the generated reset link.
+ *
+ * @param token Unique password reset token.
+ * @param recipientName Display name used in the recipient header.
+ * @param recipient Email address for delivery.
+ * @throws When the mail provider returns an error.
+ */
 export const sendResetEmail = async (token: string, recipientName: string, recipient?: string, ) => {
     if (!recipient) {
         console.error("User has no email address");
@@ -53,6 +62,17 @@ export const sendResetEmail = async (token: string, recipientName: string, recip
     }
 }
 
+/**
+ * Creates a new password reset token for one applicant.
+ *
+ * Existing tokens for the same user are removed first so only one active token
+ * remains. Token generation is wrapped in a transaction to keep this flow atomic.
+ *
+ * @param db Prisma client used for database operations.
+ * @param input Payload containing the target user id.
+ * @returns Newly created reset token.
+ * @throws When input validation fails or user cannot be found.
+ */
 export const createPasswordResetToken = async (db: PrismaClient, input: CreateResetPasswordTokenValues) => {
     const validationResult = createResetPasswordTokenSchema.safeParse(input);
     if (!validationResult.success) {
@@ -114,11 +134,12 @@ export const createPasswordResetToken = async (db: PrismaClient, input: CreateRe
 }
 
 /**
- * Updates the user's username and password based on the provided reset token and new credentials.
- * @param db the prisma client
- * @param input the reset password values containing the token, new username, and new password
- * @throws an error if the token is invalid or expired, if the new username is already taken, or if the input validation fails
- * @returns a promise resolving when the update is successful
+ * Updates credentials for the user referenced by a reset token.
+ *
+ * @param db Prisma client used for database operations.
+ * @param input Reset payload containing token, new username, and new password.
+ * @throws If token is invalid/expired, username is already taken, or validation fails.
+ * @returns Transaction promise that updates user and consumes the token.
  */
 export const updateUsernamePassword = async (db: PrismaClient, input: ResetPasswordValues) => {
     const validationResult = resetPasswordSchema.safeParse(input);

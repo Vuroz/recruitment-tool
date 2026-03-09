@@ -7,7 +7,11 @@ import { createTRPCRouter, publicProcedure, protectedProcedure } from "@/server/
 import { getUserByToken, updateUsernamePassword, createPasswordResetToken } from "@/server/logic/resetPasswordService";
 import { USER_ROLES } from "@/server/auth/roles";
 
+/** Router for password reset token validation and credential updates. */
 export const resetPasswordRouter = createTRPCRouter({
+    /**
+     * Resolves basic user details for a reset token and validates expiry.
+     */
     getUserDetails: publicProcedure
         .input(resetPasswordRequestSchema)
         .query(async ({ ctx, input }) => {
@@ -29,6 +33,7 @@ export const resetPasswordRouter = createTRPCRouter({
 
             return res.user
         }),
+    /** Applies username/password updates using a valid reset token. */
     updateUsernamePassword: publicProcedure
         .input(resetPasswordSchema)
         .mutation(async ({ ctx, input }) => {
@@ -48,6 +53,9 @@ export const resetPasswordRouter = createTRPCRouter({
                 }
             }
         }),
+    /**
+     * Recruiter-only endpoint that creates and dispatches a reset token.
+     */
     createPasswordResetToken: protectedProcedure
         .input(createResetPasswordTokenSchema)
         .mutation(async ({ ctx, input }) => {

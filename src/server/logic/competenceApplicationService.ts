@@ -4,6 +4,18 @@ import {
   type CompetenceApplicationValues,
 } from "@/validation/competence";
 
+/**
+ * Replaces all competence selections for a user in one transaction.
+ *
+ * This follows a full-replace strategy: existing rows are removed, then the
+ * validated batch is inserted. This keeps persistence logic simple and consitent.
+ *
+ * @param db Prisma client used for database operations.
+ * @param userId Applicant id owning the competence selections.
+ * @param selections New list of competence applications.
+ * @returns Transaction promise completing delete + insert operations.
+ * @throws When any entry in the batch fails schema validation.
+ */
 export const applyCompetences = async (
   db: PrismaClient,
   userId: string,
