@@ -46,6 +46,14 @@ model application_state {
   user       User      @relation(fields: [user_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
 }
 
+model password_reset_token {
+  id         String    @id @default(cuid())
+  user_id    String
+  token      String    @unique
+  expires    DateTime
+  user       User      @relation(fields: [user_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
+}
+
 model User {
   id                 String               @id @default(cuid())
   username           String               @unique
@@ -64,6 +72,7 @@ model User {
   competence_profile competence_profile[]
   role               role?                @relation(fields: [role_id], references: [role_id], onDelete: NoAction, onUpdate: NoAction)
   applicationStates  application_state[]
+  passwordResetTokens password_reset_token[]
 
   @@map("users")
 }

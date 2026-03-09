@@ -1,4 +1,5 @@
 import { type PrismaClient } from "../../../generated/prisma";
+import bcrypt from "bcrypt";
 
 export const findUserByUsername = (db: PrismaClient, username: string) => {
   return db.user.findUnique({
@@ -8,6 +9,5 @@ export const findUserByUsername = (db: PrismaClient, username: string) => {
 };
 
 export const verifyUserPassword = async (password: string, hash: string) => {
-    return password == hash;
-    //   return bcrypt.compare(password, hash);
+    return bcrypt.compare(password, hash);
 };
