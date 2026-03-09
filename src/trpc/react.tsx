@@ -45,9 +45,15 @@ export function TRPCReactProvider(props: { children: React.ReactNode }) {
     api.createClient({
       links: [
         loggerLink({
-          enabled: (op) =>
-            process.env.NODE_ENV === "development" ||
-            (op.direction === "down" && op.result instanceof Error),
+          enabled: (op) => {
+            if (op.direction === "down" && op.result instanceof Error) {
+              // Suppress BAD_REQUEST (validation errors) from logging
+              return false;
+            }
+            return process.env.NODE_ENV === "development";
+          }
+            // process.env.NODE_ENV === "development" ||
+            // (op.direction === "down" && op.result instanceof Error),
         }),
         httpBatchStreamLink({
           transformer: SuperJSON,
