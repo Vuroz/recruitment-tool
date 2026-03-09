@@ -3,6 +3,7 @@ import { resetPasswordSchema, createResetPasswordTokenSchema } from "@/validatio
 import { PrismaClient } from "../../../generated/prisma";
 import bcrypt from "bcrypt"
 import { randomUUID } from "crypto";
+import { resend } from "@/utils/resend";
 
 /**
  * Retrieves user details based on the provided reset token.
@@ -25,6 +26,32 @@ export const getUserByToken = (db: PrismaClient, input: ResetPasswordRequestValu
     }
   });
 };
+
+export const sendResetEmail = async (token: string, recipientName: string, recipient?: string, ) => {
+    if (!recipient) {
+        console.error("User has no email address");
+        return;
+    }
+
+    if (recipient?.endsWith("@finnsinte.se")) {
+        console.warn("User's email domain is finnsinte.se, skipping sending reset link");
+        return;
+    }
+
+    const { data, error } = await resend.emails.send({
+        from: 'Friend <reset@noreply.vuroz.dev>',
+        to: `${recipientName} <${recipient}>`,
+        subject: 'Password Reset Request',
+        html: `<p>You need to reset your username and password.</p>
+               <a href="https://iv1201.vuroz.dev/reset/${token}">Reset Password</a>
+               <p>If you did not apply to [company name], please ignore this email</p>`,
+    });
+
+    if (error) {
+        console.error(error);
+        throw new Error("Failed to send reset email");
+    }
+}
 
 export const createPasswordResetToken = async (db: PrismaClient, input: CreateResetPasswordTokenValues) => {
     const validationResult = createResetPasswordTokenSchema.safeParse(input);
@@ -80,6 +107,8 @@ export const createPasswordResetToken = async (db: PrismaClient, input: CreateRe
             }
         });
     });
+
+    await sendResetEmail(token, user.name ?? "", user.email ?? "");
 
     return token
 }
