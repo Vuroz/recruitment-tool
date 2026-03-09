@@ -5,6 +5,8 @@ import {
     type RegistrationValues,
 } from "@/validation/registration";
 
+import bcrypt from "bcrypt";
+
 /**
  * Creates a new user with an initial application state.
  * 
@@ -22,6 +24,8 @@ export const createUser = (
         throw new Error("Internal server error");
     }
     const validatedValues = validationResult.data;
+
+    const hashedPassword = bcrypt.hashSync(validatedValues.password, 10);
     
     return db.$transaction(async (prisma) => {
         await prisma.user.create({
@@ -31,9 +35,9 @@ export const createUser = (
                 email: validatedValues.email,
                 pnr: validatedValues.pnr,
                 username: validatedValues.username,
-                password: validatedValues.password,
+                password: hashedPassword,
                 role_id: 2,
-                
+
                 applicationStates: {
                     create: {
                         state_id: 0,
