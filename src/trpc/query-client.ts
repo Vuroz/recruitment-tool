@@ -1,11 +1,31 @@
 import {
   defaultShouldDehydrateQuery,
+  MutationCache,
+  QueryCache,
   QueryClient,
 } from "@tanstack/react-query";
 import SuperJSON from "superjson";
+import {
+  isDatabaseUnavailableError,
+  redirectToServiceUnavailable,
+} from "@/utils/databaseAvailability";
 
 export const createQueryClient = () =>
   new QueryClient({
+    queryCache: new QueryCache({
+      onError: (error) => {
+        if (isDatabaseUnavailableError(error)) {
+          redirectToServiceUnavailable();
+        }
+      },
+    }),
+    mutationCache: new MutationCache({
+      onError: (error) => {
+        if (isDatabaseUnavailableError(error)) {
+          redirectToServiceUnavailable();
+        }
+      },
+    }),
     defaultOptions: {
       queries: {
         // With SSR, we usually want to set some default staleTime

@@ -7,6 +7,7 @@ import FormView from "./form";
 import { api } from "@/trpc/react";
 import { useRouter } from "next/navigation";
 import { signIn } from "next-auth/react";
+import { isDatabaseUnavailableError } from "@/utils/databaseAvailability";
 
 export default function RegisterClientsidePresenter() {
   const router = useRouter();
@@ -21,6 +22,9 @@ export default function RegisterClientsidePresenter() {
       router.push("/portal");
     },
     onError: (error) => {
+      if (isDatabaseUnavailableError(error)) {
+        return;
+      }
       if (error.data?.zodError) {
         const validationErrors = error.data.zodError.fieldErrors;
         if (validationErrors) {
