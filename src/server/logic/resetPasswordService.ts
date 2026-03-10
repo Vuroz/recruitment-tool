@@ -1,6 +1,6 @@
 import type { ResetPasswordRequestValues, ResetPasswordValues, CreateResetPasswordTokenValues } from "@/validation/resetPassword";
 import { resetPasswordSchema, createResetPasswordTokenSchema } from "@/validation/resetPassword";
-import { PrismaClient } from "../../../generated/prisma";
+import type { PrismaClient } from "../../../generated/prisma";
 import bcrypt from "bcrypt"
 import { randomUUID } from "crypto";
 import { resend } from "@/utils/resend";
@@ -48,7 +48,7 @@ export const sendResetEmail = async (token: string, recipientName: string, recip
         return;
     }
 
-    const { data, error } = await resend.emails.send({
+    const { error } = await resend.emails.send({
         from: 'Friend <reset@noreply.vuroz.dev>',
         to: `${recipientName} <${recipient}>`,
         subject: 'Password Reset Request',
@@ -121,6 +121,8 @@ export const createPasswordResetToken = async (db: PrismaClient, input: CreateRe
             // The chance of this happening is roughly 1 / 2^122, but gotta handle it
             if (!exists) {
                 done = true;
+            } else {
+                token = randomUUID();
             }
         }
         

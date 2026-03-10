@@ -20,7 +20,7 @@ export default function ResetPWClientsidePresenter({ token }: ResetPWClientsideP
     const router = useRouter();
 
     function onSignOutACB() {
-        signOut();
+        void signOut();
     }
 
     const userDetails = api.resetPassword.getUserDetails.useQuery(

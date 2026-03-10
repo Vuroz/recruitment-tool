@@ -1,5 +1,3 @@
-import { api } from "@/trpc/server";
-
 import { redirect } from "next/navigation";
 
 import ResetPWClientsidePresenter from "./_components/reset-client";
