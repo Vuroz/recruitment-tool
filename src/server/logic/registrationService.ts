@@ -6,6 +6,7 @@ import {
 } from "@/validation/registration";
 
 import bcrypt from "bcrypt";
+import { logMainEvent, logMainError } from "@/server/logger";
 
 /**
  * Creates a new user with an initial application state.
@@ -21,6 +22,7 @@ export const createUser = (
 ) => {
     const validationResult = registrationSchema.safeParse(values);
     if (!validationResult.success) {
+        logMainError("User registration failed", { reason: "validation_error" });
         throw new Error("Internal server error");
     }
     const validatedValues = validationResult.data;
@@ -45,5 +47,7 @@ export const createUser = (
                 }
             }
         });
+
+        logMainEvent("User registered", { username: validatedValues.username });
     });
 }

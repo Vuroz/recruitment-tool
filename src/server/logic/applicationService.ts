@@ -1,4 +1,5 @@
 import type { PrismaClient } from "../../../generated/prisma";
+import { logMainError, logMainEvent } from "@/server/logger";
 
 /**
  * Fetches all competence profiles for a specific user.
@@ -78,7 +79,12 @@ export const updateApplicationState = (db: PrismaClient, userId: string, newStat
     };
 
     return db.$transaction(async (prisma) => {
-        await prisma.application_state.updateMany({
+        const user = await prisma.user.findUnique({
+            where: { id: userId },
+            select: { username: true },
+        });
+
+        const result = await prisma.application_state.updateMany({
             where: {
                 user_id: userId
             },
@@ -86,6 +92,17 @@ export const updateApplicationState = (db: PrismaClient, userId: string, newStat
                 state_id: stateMap[newState],
                 updated_at: new Date()
             }
+        });
+
+        if (result.count === 0) {
+            logMainError("Application state update failed", { userId, reason: "state_not_found" });
+            return;
+        }
+
+        logMainEvent("Application state updated", {
+            userId,
+            username: user?.username ?? "unknown",
+            state: newState,
         });
     });
 }

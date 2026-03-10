@@ -5,6 +5,7 @@ import CredentialsProvider from "next-auth/providers/credentials";
 import { db } from "@/server/db";
 import { verifyUserPassword, findUserByUsername } from "@/server/logic/authService";
 import { USER_ROLES, type UserRole } from "@/server/auth/roles";
+import { logMainError, logMainEvent } from "@/server/logger";
 
 /**
  * Options for NextAuth.js used to configure adapters, providers, callbacks, etc.
@@ -25,26 +26,26 @@ export const authConfig = {
         const password = credentials?.password;
 
         if (typeof username !== "string" || typeof password !== "string") {
-          console.error("Missing credentials");
+          logMainError("Login failed", { reason: "missing_credentials" });
           return null;
         }
 
         const user = await findUserByUsername(db, username);
 
         if (!user) {
-          console.error("No user for", username);
+          logMainError("Login failed", { username, reason: "user_not_found" });
           return null;
         }
 
         if (!user.password) {
-          console.error("User has no password");
+          logMainError("Login failed", { username, reason: "missing_password" });
           return null;
         }
 
         const passwordValid = await verifyUserPassword(password, user.password);
 
         if (!passwordValid) {
-          console.error("Bad password");
+          logMainError("Login failed", { username, reason: "bad_password" });
           return null;
         }
 
@@ -53,6 +54,8 @@ export const authConfig = {
           roleName === USER_ROLES.RECRUITER || roleName === USER_ROLES.APPLICANT
             ? roleName
             : undefined;
+
+        logMainEvent("User logged in", { username, role: role ?? "unknown" });
 
         return {
           id: user.id,

@@ -4,6 +4,7 @@ import { PrismaClient } from "../../../generated/prisma";
 import bcrypt from "bcrypt"
 import { randomUUID } from "crypto";
 import { resend } from "@/utils/resend";
+import { logMainError, logMainEvent } from "@/server/logger";
 
 /**
  * Resolves a reset token and loads lightweight user details for the reset page.
@@ -38,12 +39,12 @@ export const getUserByToken = (db: PrismaClient, input: ResetPasswordRequestValu
  */
 export const sendResetEmail = async (token: string, recipientName: string, recipient?: string, ) => {
     if (!recipient) {
-        console.error("User has no email address");
+        logMainError("Reset email skipped", { reason: "missing_email", recipientName });
         return;
     }
 
     if (recipient?.endsWith("@finnsinte.se")) {
-        console.warn("User's email domain is finnsinte.se, skipping sending reset link");
+        logMainEvent("Reset email skipped", { reason: "blocked_domain", recipient });
         return;
     }
 
@@ -57,9 +58,11 @@ export const sendResetEmail = async (token: string, recipientName: string, recip
     });
 
     if (error) {
-        console.error(error);
+        logMainError("Reset email send failed", { recipient, reason: error.message });
         throw new Error("Failed to send reset email");
     }
+
+    logMainEvent("Password reset email sent", { recipient });
 }
 
 /**
@@ -76,6 +79,7 @@ export const sendResetEmail = async (token: string, recipientName: string, recip
 export const createPasswordResetToken = async (db: PrismaClient, input: CreateResetPasswordTokenValues) => {
     const validationResult = createResetPasswordTokenSchema.safeParse(input);
     if (!validationResult.success) {
+        logMainError("Create reset token failed", { reason: "validation_error" });
         throw new Error("Internal server error");
     }
     const validatedValues = validationResult.data;
@@ -87,6 +91,7 @@ export const createPasswordResetToken = async (db: PrismaClient, input: CreateRe
     });
 
     if (!user) {
+        logMainError("Create reset token failed", { userId: validatedValues.user_id, reason: "user_not_found" });
         throw new Error("User not found");
     }
 
@@ -129,6 +134,7 @@ export const createPasswordResetToken = async (db: PrismaClient, input: CreateRe
     });
 
     await sendResetEmail(token, user.name ?? "", user.email ?? "");
+    logMainEvent("Password reset token created", { userId: validatedValues.user_id });
 
     return token
 }
@@ -144,6 +150,7 @@ export const createPasswordResetToken = async (db: PrismaClient, input: CreateRe
 export const updateUsernamePassword = async (db: PrismaClient, input: ResetPasswordValues) => {
     const validationResult = resetPasswordSchema.safeParse(input);
     if (!validationResult.success) {
+        logMainError("Credential reset failed", { reason: "validation_error" });
         throw new Error("Internal server error");
     }
     const validatedValues = validationResult.data;
@@ -161,6 +168,7 @@ export const updateUsernamePassword = async (db: PrismaClient, input: ResetPassw
     });
 
     if (!token_entry) {
+        logMainError("Credential reset failed", { reason: "invalid_or_expired_token" });
         throw new Error("Invalid or expired token");
     }
 
@@ -171,6 +179,7 @@ export const updateUsernamePassword = async (db: PrismaClient, input: ResetPassw
     });
 
     if (existing_user && existing_user.id !== token_entry.user_id) {
+        logMainError("Credential reset failed", { userId: token_entry.user_id, reason: "username_taken" });
         throw new Error("Username already taken");
     }
 
@@ -190,6 +199,11 @@ export const updateUsernamePassword = async (db: PrismaClient, input: ResetPassw
             where: {
                 token: validatedValues.token,
             }
+        });
+
+        logMainEvent("Credentials updated after reset", {
+            userId: token_entry.user_id,
+            username: validatedValues.username,
         });
     });
 };

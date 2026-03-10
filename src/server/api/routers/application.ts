@@ -7,6 +7,7 @@ import { competenceApplicationSchema } from "@/validation/competence";
 import { getUserApplications, getAllApplications, getApplicationByUserId, updateApplicationState, getApplicationStateByUserId } from "@/server/logic/applicationService";
 import { isRecruiter } from "@/server/auth/roles";
 import { applicationStateChangeSchema, userIdSchema } from "@/validation/recruiter";
+import { logMainError } from "@/server/logger";
 
 /** Router for application-related queries (competence profiles). */
 export const applicationRouter = createTRPCRouter({
@@ -61,6 +62,14 @@ export const applicationRouter = createTRPCRouter({
             // Get current application state and return error if updated_at from input differs from the one in the database (optimistic concurrency control)
             const dbApplicationState = await getApplicationStateByUserId(ctx.db, input.user_id);
             if (dbApplicationState?.updated_at?.getTime() !== input.update_at?.getTime()) {
+                logMainError("Application state update conflict", {
+                    recruiterId: ctx.session.user.id,
+                    recruiterUsername: ctx.session.user.username ?? "unknown",
+                    targetUserId: input.user_id,
+                    attemptedState: input.new_state,
+                    reason: "optimistic_lock_conflict",
+                });
+
                 throw new TRPCError({
                     code: "CONFLICT",
                     message: "Application has been updated since you last fetched it. Please refresh and try again."

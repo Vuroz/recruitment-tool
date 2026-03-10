@@ -5,6 +5,7 @@ import {
     type AvailabilityValues,
     type AvailabilityIdValue,
 } from "@/validation/availability";
+import { logMainError, logMainEvent } from "@/server/logger";
 
 /**
  * Returns all availability windows for a single user.
@@ -33,6 +34,7 @@ export const getAvailabilityByUserId = (db: PrismaClient, userId: string) => {
 export const addAvailabilityByUserId = (db: PrismaClient, userId: string, values: AvailabilityValues) => {
     const validationResult = availabilitySchema.safeParse(values);
         if (!validationResult.success) {
+            logMainError("Add availability failed", { userId, reason: "validation_error" });
             throw new Error("Internal server error");
         }
     const validatedValues = validationResult.data;
@@ -44,6 +46,12 @@ export const addAvailabilityByUserId = (db: PrismaClient, userId: string, values
                 from_date: validatedValues.from_date,
                 to_date: validatedValues.to_date,
             },
+        });
+
+        logMainEvent("Availability added", {
+            userId,
+            fromDate: validatedValues.from_date.toISOString(),
+            toDate: validatedValues.to_date.toISOString(),
         });
     });
 };
@@ -63,6 +71,7 @@ export const addAvailabilityByUserId = (db: PrismaClient, userId: string, values
 export const removeAvailabilityById = (db: PrismaClient, userId: string, value: AvailabilityIdValue) => {
     const validationResult = availabilityIdSchema.safeParse(value);
     if (!validationResult.success) {
+        logMainError("Remove availability failed", { userId, reason: "validation_error" });
         throw new Error("Internal server error");
     }
     const validatedValue = validationResult.data;
@@ -73,11 +82,25 @@ export const removeAvailabilityById = (db: PrismaClient, userId: string, value: 
         // if the logged in user's id matches the one in the record.
 
         // in other words, this works both as a performance optimization and a security measure
-        await prisma.availability.deleteMany({
+        const result = await prisma.availability.deleteMany({
             where: {
                 availability_id: validatedValue.id,
                 user_id: userId,
             }
         })
+
+        if (result.count === 0) {
+            logMainError("Remove availability failed", {
+                userId,
+                availabilityId: validatedValue.id,
+                reason: "not_found_or_not_owned",
+            });
+            return;
+        }
+
+        logMainEvent("Availability removed", {
+            userId,
+            availabilityId: validatedValue.id,
+        });
     });
 }

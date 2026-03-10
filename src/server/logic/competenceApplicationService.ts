@@ -3,6 +3,7 @@ import {
   competenceApplicationSchema,
   type CompetenceApplicationValues,
 } from "@/validation/competence";
+import { logMainError, logMainEvent } from "@/server/logger";
 
 /**
  * Replaces all competence selections for a user in one transaction.
@@ -24,6 +25,7 @@ export const applyCompetences = async (
   for (const sel of selections) {
     const result = competenceApplicationSchema.safeParse(sel);
     if (!result.success) {
+      logMainError("Competence update failed", { userId, reason: "validation_error" });
       throw new Error("Invalid competence application in batch");
     }
   }
@@ -36,6 +38,7 @@ export const applyCompetences = async (
     });
 
     if (!selections.length) {
+      logMainEvent("Competence profile cleared", { userId });
       return;
     }
 
@@ -46,5 +49,7 @@ export const applyCompetences = async (
         years_of_experience: sel.years,
       })),
     });
+
+    logMainEvent("Competence profile updated", { userId, entries: selections.length });
   });
 };
